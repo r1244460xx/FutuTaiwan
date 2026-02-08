@@ -7,52 +7,41 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 個股群組實體 (Stock Group Entity)
- * 用於儲存使用者自訂的個股群組
+ * 股票群組實體 (StockGroup Entity)
+ * 對應資料庫中的 'stock_groups' 表格
  */
 @Entity
 @Table(name = "stock_groups")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data // Lombok: 自動生成 getter, setter, toString, equals, hashCode
+@NoArgsConstructor // Lombok: 自動生成無參建構子
+@AllArgsConstructor // Lombok: 自動生成包含所有欄位的建構子
+@Builder // Lombok: 提供 Builder 模式
 public class StockGroup {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 對應 PostgreSQL 的 SERIAL
     private Long id;
 
-    @Column(name = "group_name", nullable = false, length = 100)
-    private String groupName;
+    @Column(name = "name", nullable = false, length = 100, unique = true)
+    private String name;
 
-    // 多個個股群組可以屬於一個會員 (Many stock groups to One Member)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false) // 外鍵指向 member 表的 id
+    @Column(name = "description", length = 500)
+    private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY) // 多個 StockGroup 可以屬於一個 Member
+    @JoinColumn(name = "member_id", nullable = false) // 外鍵欄位
     private Member member;
 
-    // 一個個股群組可以有多個股票，一個股票也可以屬於多個群組 (Many stock groups to Many Stocks)
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-        name = "stock_group_stocks", // 關聯表的名稱
-        joinColumns = @JoinColumn(name = "stock_group_id"), // 本實體 (StockGroup) 在關聯表中的外鍵
-        inverseJoinColumns = @JoinColumn(name = "stock_id") // 另一個實體 (Stock) 在關聯表中的外鍵
+            name = "stock_group_stocks",
+            joinColumns = @JoinColumn(name = "stock_group_id"),
+            inverseJoinColumns = @JoinColumn(name = "stock_id")
     )
-    @Builder.Default // 使用 Lombok 的 @Builder 時，為集合類型提供預設值
     private Set<Stock> stocks = new HashSet<>();
-
-    @CreationTimestamp // 自動在實體首次持久化時設置時間
-    @Column(name = "creation_date", nullable = false, updatable = false)
-    private Instant creationDate;
-
-    @UpdateTimestamp // 自動在實體更新時設置時間
-    @Column(name = "last_updated_date", nullable = false)
-    private Instant lastUpdatedDate;
 }

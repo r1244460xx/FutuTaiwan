@@ -5,12 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
 
 /**
- * 個股實體 (Stock Entity)
+ * 股票實體 (Stock Entity)
  * 對應資料庫中的 'stocks' 表格
  */
 @Entity
@@ -25,16 +22,9 @@ public class Stock {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 對應 PostgreSQL 的 SERIAL
     private Long id;
 
-    @Column(name = "stock_code", unique = true, nullable = false, length = 20)
-    private String stockCode;
+    @Column(name = "code", nullable = false, length = 10, unique = true) // 將 symbol 改為 code
+    private String code; // 股票代碼，例如 "2330"
 
-    @Column(name = "stock_name", unique = true, nullable = false, length = 100)
-    private String stockName;
-
-    @Column(name = "industry", length = 100)
-    private String industry;
-
-    @UpdateTimestamp // 自動在實體更新時設置時間
-    @Column(name = "last_updated", nullable = false)
-    private Instant lastUpdated;
+    @Column(name = "name", nullable = false, length = 100, unique = true)
+    private String name; // 公司名稱，例如 "台積電"
 }

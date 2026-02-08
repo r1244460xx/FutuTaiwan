@@ -1,5 +1,6 @@
 package com.fututaiwan.member;
 
+import com.fututaiwan.stockgroup.StockGroup;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 會員實體 (Member Entity)
@@ -62,4 +65,7 @@ public class Member {
 
     @Column(name = "role", nullable = false, length = 50)
     private String role = "member"; // 預設值與資料庫一致
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<StockGroup> stockGroups = new HashSet<>();
 }
